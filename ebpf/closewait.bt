@@ -1,0 +1,19 @@
+// closewait-scope: edad exacta de CLOSE_WAIT por socket (requiere root y bpftrace).
+// Entrada: transición a CLOSE_WAIT (8). Salida: transición desde CLOSE_WAIT.
+// La transición ocurre en softirq: el pid de contexto NO es el dueño; la atribución
+// a proceso se hace en userspace por 4-tupla (closewait_scope.ebpf).
+tracepoint:sock:inet_sock_set_state
+/args->protocol == 6 && (args->newstate == 8 || args->oldstate == 8)/
+{
+  if (args->newstate == 8) {
+    @t[args->skaddr] = nsecs;
+    printf("ENTER %llu %d %d\n", nsecs, args->sport, args->dport);
+  } else {
+    $s = @t[args->skaddr];
+    if ($s != 0) {
+      printf("EXIT %llu %d %d %llu\n", nsecs, args->sport, args->dport, nsecs - $s);
+      delete(@t[args->skaddr]);
+    }
+  }
+}
+END { clear(@t); }
