@@ -1,6 +1,7 @@
 // Carga de conexiones en loopback para el experimento C del pre-registro.
 // Uso: connload <conn_por_s> <segundos> <hilos_cliente>
-// El servidor cierra primero: cada conexión del cliente pasa por CLOSE_WAIT.
+// El servidor cierra primero (shutdown SHUT_WR): cada conexión del cliente pasa por
+// CLOSE_WAIT y después cierra con RST (SO_LINGER 0).
 // Imprime JSON con conexiones logradas y CPU (usuario+sistema) del proceso.
 #define _GNU_SOURCE
 #include <arpa/inet.h>
@@ -16,7 +17,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define NDST 8
+#define NDST 200  // 200 destinos 127.0.0.x: evita colisiones de 4-tupla con TIME_WAIT a 10k/s
 static int lfd;
 static int port;
 static double rate_per_thread, seconds;
@@ -33,7 +34,13 @@ static void *server(void *a) {
   (void)a;
   while (!atomic_load(&stop)) {
     int c = accept4(lfd, NULL, NULL, SOCK_CLOEXEC);
-    if (c >= 0) close(c);
+    if (c < 0) continue;
+    // FIN al cliente (pasa a CLOSE_WAIT); el cliente responde con RST y ninguno de
+    // los dos lados queda en TIME_WAIT (a 10k/s el TIME_WAIT agota la tabla de puertos).
+    shutdown(c, SHUT_WR);
+    char b[16];
+    while (read(c, b, sizeof b) > 0) {}
+    close(c);
   }
   return NULL;
 }
@@ -52,6 +59,8 @@ static void *client(void *a) {
       if (s >= 0) close(s);
     } else {
       while (read(s, buf, sizeof buf) > 0) {}
+      struct linger lg = {1, 0};
+      setsockopt(s, SOL_SOCKET, SO_LINGER, &lg, sizeof lg);
       close(s);
       atomic_fetch_add(&done, 1);
     }
@@ -80,8 +89,8 @@ int main(int argc, char **argv) {
   socklen_t l = sizeof a;
   getsockname(lfd, (struct sockaddr *)&a, &l);
   port = ntohs(a.sin_port);
-  pthread_t sv[2], *cl = calloc(nt, sizeof *cl);
-  for (int i = 0; i < 2; i++) pthread_create(&sv[i], NULL, server, NULL);
+  pthread_t sv[4], *cl = calloc(nt, sizeof *cl);
+  for (int i = 0; i < 4; i++) pthread_create(&sv[i], NULL, server, NULL);
   double t0 = now();
   for (long i = 0; i < nt; i++) pthread_create(&cl[i], NULL, client, (void *)i);
   for (int i = 0; i < nt; i++) pthread_join(cl[i], NULL);

@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "gunicorn==26.2.0" "requests>=2.31"
+      - name: Tests (un test salteado hace fallar el job)
+        run: python -m tests.run
+      - name: Permitir namespaces de usuario sin privilegios (experimento B)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Laboratorio A, B y C userspace
+        run: python -m lab.measure
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-userspace
+          path: lab/out/results.json
+
+  ebpf:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar bpftrace
+        run: sudo apt-get update && sudo apt-get install -y bpftrace
+      - name: Backend eBPF ve entrada y salida de CLOSE_WAIT (falla si no adjunta)
+        run: sudo python3 -m tests.ebpf_check
+      - name: Overhead eBPF a 10.000 conn/s
+        run: |
+          mkdir -p lab/out
+          sudo python3 -m lab.overhead --ebpf | tee lab/out/overhead-ebpf.json
+          python3 -c "import json;d=json.load(open('lab/out/overhead-ebpf.json'));assert d['pairs'], 'sin pares medidos'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-ebpf
+          path: lab/out/overhead-ebpf.json

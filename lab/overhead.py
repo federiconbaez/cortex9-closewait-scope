@@ -61,7 +61,7 @@ def main(ebpf: bool = False) -> dict:
             nev = None
         pairs.append({"off": off, "on": on, "tool_cpu_s": round(tool_cpu, 3), "ebpf_events": nev})
         print(f"[C] par {i + 1}: off {off['conn_per_s']}/s cpu {off['cpu_s']}s | on {on['conn_per_s']}/s "
-              f"cpu {on['cpu_s']}s herramienta {tool_cpu:.3f}s", flush=True)
+              f"cpu {on['cpu_s']}s herramienta {tool_cpu:.3f}s", file=sys.stderr, flush=True)
     if ebpf:
         ov = [(p["on"]["cpu_s"] + p["tool_cpu_s"]) / p["off"]["cpu_s"] - 1 for p in pairs]
         formula = "(cpu_carga_con_sonda + cpu_bpftrace) / cpu_carga_sin_sonda - 1"
