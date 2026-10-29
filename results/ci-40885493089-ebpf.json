@@ -1,0 +1,108 @@
+{
+  "backend": "ebpf",
+  "formula": "(cpu_carga_con_sonda + cpu_bpftrace) / cpu_carga_sin_sonda - 1",
+  "pairs": [
+    {
+      "off": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.001,
+        "conn_per_s": 9999.7,
+        "cpu_s": 25.388
+      },
+      "on": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.001,
+        "conn_per_s": 9999.7,
+        "cpu_s": 30.855
+      },
+      "tool_cpu_s": 5.9,
+      "ebpf_events": 400024
+    },
+    {
+      "off": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.0,
+        "conn_per_s": 9999.8,
+        "cpu_s": 25.451
+      },
+      "on": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.001,
+        "conn_per_s": 9999.7,
+        "cpu_s": 30.301
+      },
+      "tool_cpu_s": 5.44,
+      "ebpf_events": 400024
+    },
+    {
+      "off": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.001,
+        "conn_per_s": 9999.7,
+        "cpu_s": 24.353
+      },
+      "on": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.001,
+        "conn_per_s": 9999.7,
+        "cpu_s": 29.665
+      },
+      "tool_cpu_s": 4.98,
+      "ebpf_events": 400036
+    },
+    {
+      "off": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.0,
+        "conn_per_s": 9999.8,
+        "cpu_s": 25.532
+      },
+      "on": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.001,
+        "conn_per_s": 9999.7,
+        "cpu_s": 30.086
+      },
+      "tool_cpu_s": 5.45,
+      "ebpf_events": 400022
+    },
+    {
+      "off": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.0,
+        "conn_per_s": 9999.8,
+        "cpu_s": 24.737
+      },
+      "on": {
+        "conns": 200000,
+        "errors": 0,
+        "wall_s": 20.001,
+        "conn_per_s": 9999.7,
+        "cpu_s": 30.43
+      },
+      "tool_cpu_s": 5.6,
+      "ebpf_events": 400024
+    }
+  ],
+  "overhead_median": 0.4226,
+  "overhead_max": 0.4565,
+  "overhead_all": [
+    0.4477,
+    0.4043,
+    0.4226,
+    0.3918,
+    0.4565
+  ],
+  "achieved_conn_per_s_min": 9999.7,
+  "threshold": 0.02,
+  "pass": false
+}

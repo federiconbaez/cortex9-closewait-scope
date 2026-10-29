@@ -1,0 +1,299 @@
+{
+  "host": {
+    "kernel": "7.0.0-1017-azure",
+    "python": "3.12.15",
+    "cpus": 4
+  },
+  "started_utc": "2026-10-29T13:49:35Z",
+  "A_causes": {
+    "repros": [
+      {
+        "expected": "app_never_closes",
+        "runs": [
+          {
+            "run": 1,
+            "cause": "app_never_closes",
+            "ok": true,
+            "group": {
+              "comm": "python",
+              "role": "server",
+              "peer_class": "loopback",
+              "seen": 111,
+              "left": 0,
+              "current": 111,
+              "rxq_nonzero_frac": 0.0,
+              "leak_rate_per_s": 19.698
+            }
+          },
+          {
+            "run": 2,
+            "cause": "app_never_closes",
+            "ok": true,
+            "group": {
+              "comm": "python",
+              "role": "server",
+              "peer_class": "loopback",
+              "seen": 111,
+              "left": 0,
+              "current": 111,
+              "rxq_nonzero_frac": 0.0,
+              "leak_rate_per_s": 19.7
+            }
+          },
+          {
+            "run": 3,
+            "cause": "app_never_closes",
+            "ok": true,
+            "group": {
+              "comm": "python",
+              "role": "server",
+              "peer_class": "loopback",
+              "seen": 111,
+              "left": 0,
+              "current": 111,
+              "rxq_nonzero_frac": 0.0,
+              "leak_rate_per_s": 19.701
+            }
+          }
+        ],
+        "ok": true
+      },
+      {
+        "expected": "worker_backlog_timeout",
+        "runs": [
+          {
+            "run": 1,
+            "cause": "worker_backlog_timeout",
+            "ok": true,
+            "group": {
+              "comm": "gunicorn",
+              "role": "server",
+              "peer_class": "loopback",
+              "seen": 20,
+              "left": 2,
+              "current": 18,
+              "rxq_nonzero_frac": 0.95,
+              "leak_rate_per_s": 3.005
+            }
+          },
+          {
+            "run": 2,
+            "cause": "worker_backlog_timeout",
+            "ok": true,
+            "group": {
+              "comm": "gunicorn",
+              "role": "server",
+              "peer_class": "loopback",
+              "seen": 20,
+              "left": 2,
+              "current": 18,
+              "rxq_nonzero_frac": 0.95,
+              "leak_rate_per_s": 3.001
+            }
+          },
+          {
+            "run": 3,
+            "cause": "worker_backlog_timeout",
+            "ok": true,
+            "group": {
+              "comm": "gunicorn",
+              "role": "server",
+              "peer_class": "loopback",
+              "seen": 20,
+              "left": 2,
+              "current": 18,
+              "rxq_nonzero_frac": 0.95,
+              "leak_rate_per_s": 3.001
+            }
+          }
+        ],
+        "ok": true
+      },
+      {
+        "expected": "upstream_keepalive_pool",
+        "runs": [
+          {
+            "run": 1,
+            "cause": "upstream_keepalive_pool",
+            "ok": true,
+            "group": {
+              "comm": "python",
+              "role": "client",
+              "peer_class": "loopback",
+              "seen": 10,
+              "left": 0,
+              "current": 10,
+              "rxq_nonzero_frac": 0.0,
+              "leak_rate_per_s": 0.0
+            }
+          },
+          {
+            "run": 2,
+            "cause": "upstream_keepalive_pool",
+            "ok": true,
+            "group": {
+              "comm": "python",
+              "role": "client",
+              "peer_class": "loopback",
+              "seen": 10,
+              "left": 0,
+              "current": 10,
+              "rxq_nonzero_frac": 0.0,
+              "leak_rate_per_s": 0.0
+            }
+          },
+          {
+            "run": 3,
+            "cause": "upstream_keepalive_pool",
+            "ok": true,
+            "group": {
+              "comm": "python",
+              "role": "client",
+              "peer_class": "loopback",
+              "seen": 10,
+              "left": 0,
+              "current": 10,
+              "rxq_nonzero_frac": 0.0,
+              "leak_rate_per_s": 0.0
+            }
+          }
+        ],
+        "ok": true
+      }
+    ],
+    "correct": 3,
+    "total": 3
+  },
+  "B_attribution": {
+    "seed": 49,
+    "truth_sockets": 1000,
+    "correct": 1000,
+    "pid_ok": 1000,
+    "peer_ok": 1000,
+    "missing": 0,
+    "extra_reported": 0,
+    "decoys_reported": 0,
+    "backend": "netlink",
+    "scan_seconds": 0.0369,
+    "shared_child_pid": 2554,
+    "by_class": {
+      "loopback": 324,
+      "private": 343,
+      "public": 333
+    },
+    "accuracy": 1.0
+  },
+  "C_overhead_userspace": {
+    "backend": "userspace",
+    "formula": "cpu_herramienta / cpu_carga_misma_corrida",
+    "pairs": [
+      {
+        "off": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.0,
+          "conn_per_s": 9999.8,
+          "cpu_s": 25.342
+        },
+        "on": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.793
+        },
+        "tool_cpu_s": 0.231,
+        "ebpf_events": null
+      },
+      {
+        "off": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.319
+        },
+        "on": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.683
+        },
+        "tool_cpu_s": 0.223,
+        "ebpf_events": null
+      },
+      {
+        "off": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.817
+        },
+        "on": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.996
+        },
+        "tool_cpu_s": 0.241,
+        "ebpf_events": null
+      },
+      {
+        "off": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.252
+        },
+        "on": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.654
+        },
+        "tool_cpu_s": 0.225,
+        "ebpf_events": null
+      },
+      {
+        "off": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 24.967
+        },
+        "on": {
+          "conns": 200000,
+          "errors": 0,
+          "wall_s": 20.001,
+          "conn_per_s": 9999.7,
+          "cpu_s": 25.548
+        },
+        "tool_cpu_s": 0.222,
+        "ebpf_events": null
+      }
+    ],
+    "overhead_median": 0.0088,
+    "overhead_max": 0.0093,
+    "overhead_all": [
+      0.009,
+      0.0087,
+      0.0093,
+      0.0088,
+      0.0087
+    ],
+    "achieved_conn_per_s_min": 9999.7,
+    "threshold": 0.02,
+    "pass": true
+  },
+  "verdicts": {
+    "A (3/3)": "cumplido",
+    "B (>=95% de 1000)": "cumplido",
+    "C userspace (<2%)": "cumplido"
+  }
+}

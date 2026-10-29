@@ -47,7 +47,7 @@ Reproducir: `pip install gunicorn==26.2.0 requests && python -m lab.measure`.
 | A. Causa de 3 fugas reproducidas, 3 corridas c/u | 3/3 | 3/3 (9/9 corridas) | cumplido, **por construcción** |
 | B. Atribución pid + clase de peer, 1.000 CLOSE_WAIT | ≥ 95% | 1000/1000, 0 señuelos reportados | cumplido, **por construcción** |
 | C. Overhead userspace a 10.000 conn/s, 5 pares | < 2% | mediana 1,04%, máximo 1,09% | cumplido |
-| C. Overhead eBPF a 10.000 conn/s | < 2% | lo mide el job `ebpf` de CI (artefacto `results-ebpf`) | ver CI |
+| C. Overhead eBPF a 10.000 conn/s (CI) | < 2% | mediana 42,3%, máximo 45,7% | **no cumplido** |
 
 Detalle:
 
@@ -62,6 +62,20 @@ Detalle:
   de CPU de la carga. La CPU de la carga varió entre 9,1 y 10,8 s entre corridas, mucho más que el costo de la
   herramienta, así que el efecto sobre la carga en sí no se puede resolver con 5 pares; la
   métrica pre-registrada es CPU de la herramienta / CPU de la carga.
+
+### Corrida en CI (run 40885493089)
+
+En `ubuntu-24.04` de GitHub (kernel 7.0.0-1017-azure, 4 CPU, Python 3.12.15) el mismo
+laboratorio dio A 3/3 (9/9 corridas), B 1000/1000 y overhead userspace con mediana 0,88%
+y máximo 0,93%. JSON en [`results/ci-40885493089-userspace.json`](results/ci-40885493089-userspace.json).
+
+El backend eBPF **no cumple** el umbral: con `bpftrace` adjunto, la carga más bpftrace
+gastó entre 39,2% y 45,7% más CPU que la carga sola (mediana 42,3%), con unos 400.000
+eventos impresos por corrida de 20 s (2 por conexión: entrada y salida de `CLOSE_WAIT`).
+JSON en [`results/ci-40885493089-ebpf.json`](results/ci-40885493089-ebpf.json). El script
+imprime una línea por evento; agregar en el kernel y leer mapas por intervalos debería
+costar menos, pero eso no está implementado ni medido. Hoy el backend eBPF sirve para
+diagnóstico corto, no para dejarlo corriendo a 10.000 conn/s.
 
 ### Por qué "por construcción"
 
@@ -81,6 +95,7 @@ cierra con RST) sin tocar métricas ni umbrales. Commit `fix(lab)` en el histori
 - **nginx #2145 no se reprodujo.** La causa `upstream_keepalive_pool` se probó con un pool
   de urllib3, no con nginx `upstream keepalive`.
 - Ninguna fuga de producción real; ningún servidor ajeno.
+- El backend eBPF cuesta 42% de CPU extra a 10.000 conn/s (medido en CI): no está pensado para producción.
 - La edad desde userspace es **cota inferior** con resolución igual al intervalo. La edad
   exacta sale del backend eBPF, que solo corre con root (en CI); la box tiene
   `unprivileged_bpf_disabled=2`.
