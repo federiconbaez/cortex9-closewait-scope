@@ -9,6 +9,7 @@ import os
 import shutil
 import signal
 import subprocess
+import threading
 import time
 
 SCRIPT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ebpf", "closewait.bt")
@@ -32,7 +33,20 @@ class Tracer:
             rest = self.proc.stdout.read() if self.proc.poll() is not None else ""
             self.proc.kill()
             raise EbpfUnavailable("bpftrace no adjuntó: " + line + rest)
+        self._lines: list[str] = []
+        self._th = threading.Thread(target=self._drain, daemon=True)
+        self._th.start()
         time.sleep(0.3)
+
+    def _drain(self) -> None:
+        # Vacía el pipe en paralelo: si no, bpftrace se bloquea con carga alta.
+        for line in self.proc.stdout:
+            self._lines.append(line)
+
+    def cpu_seconds(self) -> float:
+        with open(f"/proc/{self.proc.pid}/stat") as f:
+            fields = f.read().rsplit(")", 1)[1].split()
+        return (int(fields[11]) + int(fields[12])) / os.sysconf("SC_CLK_TCK")
 
     @property
     def pid(self) -> int:
@@ -40,8 +54,9 @@ class Tracer:
 
     def stop(self) -> list[dict]:
         self.proc.send_signal(signal.SIGINT)
-        out, _ = self.proc.communicate(timeout=30)
-        return parse_events(out)
+        self.proc.wait(timeout=30)
+        self._th.join(timeout=30)
+        return parse_events("".join(self._lines))
 
 
 def parse_events(text: str) -> list[dict]:
